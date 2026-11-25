@@ -106,3 +106,27 @@ Commit: `Docker image and compose`
 - **Measured prompt sizes:** extract ≈640 tokens, choose ≈1,430 tokens. Cost
   per 300 notes: gpt-4.1-mini two-stage $0.41, gpt-4o-mini $0.15,
   claude-haiku-4-5 single-call $0.52.
+
+### 7. 2026-11-26 01:15 · Evaluation beyond the dev set: 45 hand-written notes
+Commit: `Extra out-of-distribution eval set`
+
+- **Why:** the dev set is 60 notes, 21 chapter blocks, all English. The hidden
+  generalisation slice is every chapter and not always English.
+- **Built:** `eval/extra_notes.jsonl` (made by `eval/make_extra.py`): 35 notes
+  in other chapters (neoplasms, mental health, nervous system, eye, ear,
+  injuries, neonatal, special purpose) and 10 non-English notes (French,
+  Spanish, Portuguese, Swahili, Hindi, Arabic, Chinese). Gold codes are
+  checked against the release. `scripts/evaluate.py` scores dev as slice A
+  and extra as slice B with `score.py`.
+- **Caught (my gold was wrong):** I labelled invasive ductal carcinoma as
+  2C6Z "breast, unspecified". The system answered 2C61.0 "Invasive ductal
+  carcinoma of breast", which exists and is the correct, more specific code.
+  Fixed the gold.
+- **Changes driven by it (general, not note-specific):** neoplasm vocabulary
+  (cancer -> malignant neoplasm; keeping "cancer" pulled "Fear of cancer");
+  Chinese terms; foreign phrases translated in place so negation still applies
+  ("sin dolor lumbar"); acute otitis media is AB00, not AA90.
+- **Measured (offline):** extra-set top-1 0.667 -> 0.800, top-3 0.844 -> 0.956.
+  Dev unchanged at 0.867 / 0.933.
+- **Caveat:** these notes come from the same author as the lexicon, so they
+  are easier than the hidden set. Use them to catch breakage, not to forecast.

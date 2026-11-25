@@ -11,6 +11,9 @@ import unicodedata
 from .lexicon import ABBREVIATIONS, FOREIGN_PHRASES
 
 _TOKEN = re.compile(r"[a-z0-9]+")
+# Words replaced (not kept) by their expansion: in ICD-11 titles "cancer"
+# appears almost only in "Fear of cancer", so keeping it misleads retrieval.
+_REPLACE_ONLY = {"cancer"}
 
 # Very common words that carry no diagnostic signal. Kept short on purpose:
 # words such as "acute", "chronic", "without" matter for ICD-11 specificity.
@@ -23,22 +26,32 @@ when which who will with you your patient pt c o year years old yo day days week
 _FOREIGN = sorted(FOREIGN_PHRASES.items(), key=lambda kv: -len(kv[0]))
 
 
-def translate_phrases(text: str) -> str:
-    """Append English glosses for known non-English diagnosis phrases.
+def _phrase_rx(src: str) -> re.Pattern:
+    # Latin-script phrases need word boundaries ("homa" must not hit "lymphoma");
+    # Chinese has no spaces, and Devanagari/Arabic marks confuse \b, so those match as substrings.
+    if all(ord(ch) < 0x0250 for ch in src):
+        return re.compile(r"(?<![\w])" + re.escape(src) + r"(?![\w])")
+    return re.compile(re.escape(src))
 
-    The original text is kept; glosses are appended so English tokens are
-    available to the retriever. Runs on NFC lower-case text, before accents are
-    stripped, because Devanagari vowel signs are combining marks.
+
+_FOREIGN_RX = [(_phrase_rx(src), dst) for src, dst in _FOREIGN]
+
+
+def translate_phrases(text: str) -> str:
+    """Replace known non-English diagnosis phrases with English, in place.
+
+    In-place (not appended) so that the surrounding words still apply: in
+    "sin fiebre ni dolor lumbar" the gloss "low back pain" stays inside the
+    negated clause. Longest phrases first. Runs on NFC lower-case text, before
+    accents are stripped, because Devanagari vowel signs are combining marks.
     """
     t = unicodedata.normalize("NFC", text).lower()
-    glosses = []
-    for src, dst in _FOREIGN:
-        if src in t:
-            glosses.append(dst)
-            t = t.replace(src, " ")  # avoid "fiebre" also matching inside "fiebre tifoidea"
-    if not glosses:
-        return text
-    return text + " \n" + " ; ".join(glosses)
+    changed = False
+    for rx, dst in _FOREIGN_RX:
+        t2 = rx.sub(" " + dst + " ", t)
+        if t2 != t:
+            t, changed = t2, True
+    return t if changed else text
 
 
 def fold(text: str) -> str:
@@ -71,7 +84,8 @@ def tokens(text: str, expand_abbrev: bool = True, keep_stop: bool = False) -> li
     out: list[str] = []
     for raw in _TOKEN.findall(fold(text)):
         if expand_abbrev and raw in ABBREVIATIONS:
-            out.append(raw)
+            if raw not in _REPLACE_ONLY:
+                out.append(raw)
             out.extend(_TOKEN.findall(ABBREVIATIONS[raw]))
             continue
         out.append(raw)

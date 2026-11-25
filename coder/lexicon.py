@@ -70,6 +70,11 @@ ABBREVIATIONS: dict[str, str] = {
     "ida": "iron deficiency anaemia", "scd": "sickle cell disease", "rta": "road traffic accident injury",
     "fb": "foreign body", "fx": "fracture",
     "nof": "neck of femur",
+    # neoplasms: notes say cancer/carcinoma/tumour, titles say "malignant neoplasm(s)"
+    "cancer": "malignant neoplasm", "carcinoma": "carcinoma malignant neoplasm",
+    "malignancy": "malignant neoplasm", "ca": "carcinoma malignant neoplasm",
+    "tumour": "tumour neoplasm", "tumor": "tumour neoplasm", "mets": "metastasis secondary malignant neoplasm",
+    "lymphoma": "lymphoma", "leukaemia": "leukaemia", "leukemia": "leukaemia",
 }
 
 # Phrase-level translations (lower-case, matched as substrings of the note).
@@ -116,7 +121,9 @@ FOREIGN_PHRASES: dict[str, str] = {
     "maumivu ya kichwa": "headache", "maumivu ya tumbo": "abdominal pain", "minyoo": "intestinal helminthiasis",
     "upele": "scabies rash", "surua": "measles", "tetekuwanga": "varicella chickenpox", "pumu": "asthma",
     "kaswende": "syphilis", "kisonono": "gonorrhoea", "mafua": "common cold", "funza": "tungiasis jiggers",
+    "kisukari aina ya pili": "type 2 diabetes mellitus", "kisukari aina ya kwanza": "type 1 diabetes mellitus",
     # Hindi (Devanagari and common romanisation)
+    "टाइप 2 मधुमेह": "type 2 diabetes mellitus", "टाइप 1 मधुमेह": "type 1 diabetes mellitus",
     "मधुमेह": "diabetes mellitus", "शुगर": "diabetes mellitus", "बुखार": "fever", "उच्च रक्तचाप": "hypertension",
     "हाई बीपी": "hypertension", "दमा": "asthma", "टीबी": "tuberculosis", "तपेदिक": "tuberculosis",
     "मलेरिया": "malaria", "टाइफाइड": "typhoid fever", "पीलिया": "jaundice hepatitis", "खांसी": "cough",
@@ -131,6 +138,15 @@ FOREIGN_PHRASES: dict[str, str] = {
     "حمل": "pregnancy", "صداع": "headache", "فقر الدم": "anaemia", "التهاب المسالك البولية": "urinary tract infection",
     "التهاب اللوزتين": "tonsillitis", "التهاب الحلق": "pharyngitis", "التهاب الجيوب الأنفية": "sinusitis",
     "التهاب المعدة": "gastritis", "قرحة": "ulcer", "سعال": "cough", "اكتئاب": "depressive episode",
+    "نوبة ربو": "asthma exacerbation",
+    # Chinese (simplified)
+    "原发性高血压": "essential hypertension", "高血压": "hypertension", "2型糖尿病": "type 2 diabetes mellitus",
+    "糖尿病": "diabetes mellitus", "肺炎": "pneumonia", "哮喘": "asthma", "发热": "fever", "咳嗽": "cough",
+    "腹泻": "diarrhoea", "肺结核": "pulmonary tuberculosis", "结核": "tuberculosis", "疟疾": "malaria",
+    "胃炎": "gastritis", "尿路感染": "urinary tract infection", "妊娠": "pregnancy", "贫血": "anaemia",
+    "头痛": "headache", "上呼吸道感染": "upper respiratory tract infection", "冠心病": "coronary heart disease",
+    "抑郁": "depression", "湿疹": "eczema", "骨关节炎": "osteoarthritis", "痛风": "gout",
+    "诊断": "diagnosis",
 }
 
 # Code -> extra index terms. Parents are fine: the system walks a parent down
@@ -239,7 +255,8 @@ SYNONYMS: dict[str, list[str]] = {
     "9D00.3": ["presbyopia", "near vision difficulty"],
     "9D00.0": ["myopia", "short sightedness"],
     # 10 ear
-    "AA90": ["acute otitis media", "aom", "middle ear infection", "acute suppurative otitis media"],
+    "AB00": ["acute otitis media", "aom", "middle ear infection", "ear infection child"],
+    "AA90": ["acute suppurative otitis media", "acute otitis media with perforation discharge"],
     "AA91": ["chronic suppurative otitis media", "csom", "chronic ear discharge"],
     "AA3Z": ["otitis externa", "swimmers ear", "ear canal infection"],
     "AA42": ["wax impaction", "impacted ear wax", "cerumen impaction"],

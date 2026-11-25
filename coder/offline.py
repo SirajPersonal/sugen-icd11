@@ -23,9 +23,6 @@ CLAUSE_WEIGHTS = (1.0, 0.6, 0.45, 0.35, 0.3)
 def score_note(idx: Index, note: str) -> tuple[np.ndarray, str]:
     note_x = translate_phrases(note)
     dx = assessment_text(note_x)
-    if dx and note_x != note:
-        # keep the glosses next to the statement for non-English notes
-        dx = dx + " . " + note_x[len(note):]
     total = np.zeros(len(idx.codes), dtype=np.float32)
     parts = clauses(dx) if dx else []
     for i, c in enumerate(parts[:8]):
