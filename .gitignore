@@ -1,0 +1,6 @@
+artifacts/
+out/
+in/
+__pycache__/
+*.pyc
+.env
