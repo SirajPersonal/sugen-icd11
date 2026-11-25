@@ -128,7 +128,8 @@ class Provider:
             except Exception as e:
                 # A request that never left (connection/proxy error) cost nothing;
                 # anything else (timeout, 5xx) may have been billed, so count it.
-                no_cost = "connection" in type(e).__name__.lower()
+                no_cost = ("connection" in type(e).__name__.lower()
+                           or isinstance(e, (TypeError, ValueError, AttributeError)))  # failed locally
                 self.budget.settle(est, 0.0 if no_cost else est)
                 self._failure(e)
                 raise
@@ -207,7 +208,8 @@ class AnthropicProvider(Provider):
 
     def _call(self, model, system, user, max_tokens):
         try:
-            r = self.client.messages.create(model=model, max_tokens=max_tokens, temperature=0,
+            # Note: the pinned SDK (anthropic 2.x) no longer takes ``temperature``.
+            r = self.client.messages.create(model=model, max_tokens=max_tokens,
                                             system=system, messages=[{"role": "user", "content": user}])
         except Exception as e:
             if _looks_like_bad_model(e):
@@ -218,6 +220,20 @@ class AnthropicProvider(Provider):
         return text, getattr(u, "input_tokens", 0) or 0, getattr(u, "output_tokens", 0) or 0
 
 
+def _sanitize_tls_env() -> None:
+    """Drop CA-bundle variables that point at files that do not exist.
+
+    A host path leaking into the container (e.g. SSL_CERT_FILE=/home/me/ca.crt)
+    makes the SDKs fail at client creation, which would silently disable the
+    LLM for the whole run.
+    """
+    for var in ("SSL_CERT_FILE", "REQUESTS_CA_BUNDLE", "CURL_CA_BUNDLE"):
+        v = os.environ.get(var)
+        if v and not os.path.exists(v):
+            log(f"ignoring {var}={v} (file not found)")
+            os.environ.pop(var, None)
+
+
 def make_provider(budget: Budget) -> Provider | None:
     """OpenAI if its key is set (cheaper per note), else Anthropic, else None.
 
@@ -226,6 +242,7 @@ def make_provider(budget: Budget) -> Provider | None:
     want = os.environ.get("CODER_PROVIDER", "auto").lower()
     has_oa = bool(os.environ.get("OPENAI_API_KEY"))
     has_an = bool(os.environ.get("ANTHROPIC_API_KEY"))
+    _sanitize_tls_env()
     order = {"openai": ["openai"], "anthropic": ["anthropic"], "none": []}.get(want, ["openai", "anthropic"])
     for name in order:
         try:

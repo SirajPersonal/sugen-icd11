@@ -1,5 +1,6 @@
-numpy>=1.26
-scipy>=1.11
-scikit-learn>=1.4
-openai>=1.40
-anthropic>=0.34
+# Pinned to the versions the dev score and tests were produced with.
+numpy==2.5.3
+scipy==1.18.1
+scikit-learn==1.9.1
+openai==3.59.0
+anthropic==2.14.0

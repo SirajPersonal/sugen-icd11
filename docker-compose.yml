@@ -1,0 +1,27 @@
+services:
+  coder:
+    build: .
+    image: sugen-icd11-coder:latest
+    # Usage: docker compose run coder /in/notes.jsonl /out/predictions.jsonl
+    # ./in and ./out in the repo are mounted by default; override with IN_DIR / OUT_DIR.
+    volumes:
+      - ${IN_DIR:-./in}:/in:ro
+      - ${OUT_DIR:-./out}:/out
+    environment:
+      # Keys and proxy are passed through from the host when set (no value = not set).
+      - OPENAI_API_KEY
+      - ANTHROPIC_API_KEY
+      - HTTPS_PROXY
+      - https_proxy
+      - HTTP_PROXY
+      - http_proxy
+      - NO_PROXY
+      - no_proxy
+      # Optional tuning (see README): models, budget, deadline, workers.
+      - CODER_PROVIDER
+      - CODER_OPENAI_MODELS
+      - CODER_ANTHROPIC_MODELS
+      - CODER_BUDGET_USD
+      - CODER_DEADLINE_S
+      - CODER_WORKERS
+      - CODER_MODE

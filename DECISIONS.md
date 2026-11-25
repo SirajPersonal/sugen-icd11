@@ -72,3 +72,37 @@ Commit: `LLM pipeline`
   environment). The plumbing is tested with a fake provider.
 - **Revisit:** self-consistency (2 samples, vote) if budget allows; prompt
   caching to cut call-2 cost.
+
+### 5. 2026-11-26 00:55 · Docker: python:3.13-slim, index baked at build, pinned deps
+Commit: `Docker image and compose`
+
+- **Options:** build the index at run time (simpler image) or at build time.
+- **Chosen:** build time (`RUN python -m coder.index`), so the run needs no
+  network and starts in ~1.5 s. If the pickle is missing or stale, the code
+  rebuilds it in-process anyway.
+- **Pinned** numpy/scipy/scikit-learn/openai/anthropic to the versions the dev
+  score was produced with, so a pickle/library mismatch cannot happen.
+- **Tested:** Docker Hub is blocked from my build box, so I built a stand-in
+  `python:3.13-slim` from the local Python install and ran the exact grading
+  command: no key (66.7/75 dev, 4 s); fake key with an unreachable proxy
+  (circuit breaker trips, offline answers kept, $0 spent, 13 s).
+- **Caught:** the compose file passed `SSL_CERT_FILE` through. On my box it
+  points at a host-only path, so the OpenAI client crashed at start-up and the
+  run quietly went offline. Removed the passthrough, and the code now ignores CA
+  variables that point at missing files.
+- **Revisit:** confirm the real `python:3.13-slim` build on a machine with Docker Hub.
+
+### 6. 2026-11-26 01:00 · SDK compatibility checked against a mock API
+Commit: `Docker image and compose`
+
+- Ran the pipeline against a local mock of the OpenAI and Anthropic HTTP APIs
+  (`OPENAI_BASE_URL` / `ANTHROPIC_BASE_URL`).
+- **Caught:** the pinned `anthropic` 2.x SDK rejects `temperature=` in
+  `messages.create`. Every Anthropic call would have failed, and the failure
+  was being counted as spend. Removed the argument; local errors
+  (TypeError/ValueError) now cost $0.
+- **Verified:** a 404 on the first model falls through to the next; 300 notes
+  on Haiku pricing switch to single-call mode automatically.
+- **Measured prompt sizes:** extract ≈640 tokens, choose ≈1,430 tokens. Cost
+  per 300 notes: gpt-4.1-mini two-stage $0.41, gpt-4o-mini $0.15,
+  claude-haiku-4-5 single-call $0.52.

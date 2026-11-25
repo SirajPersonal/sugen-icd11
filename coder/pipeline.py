@@ -171,7 +171,7 @@ def finalize(idx, codes: list, fallback: list[str]) -> list[str]:
 class Coder:
     def __init__(self, idx, provider, budget: Budget, mode: str = "two_stage"):
         self.idx, self.provider, self.budget, self.mode = idx, provider, budget, mode
-        self.stats = {"llm_ok": 0, "llm_fail": 0, "budget_refused": 0, "skipped_deadline": 0}
+        self.stats = {"llm_ok": 0, "llm_fail": 0, "budget_refused": 0, "skipped": 0}
         self._lock = threading.Lock()
 
     def _bump(self, k):
@@ -180,7 +180,7 @@ class Coder:
 
     def code_llm(self, note: str, seeds: list[tuple[str, float]], fallback: list[str]) -> list[str] | None:
         if time.time() - START > DEADLINE_S or self.provider is None or self.provider.dead:
-            self._bump("skipped_deadline")
+            self._bump("skipped")
             return None
         try:
             summary = None

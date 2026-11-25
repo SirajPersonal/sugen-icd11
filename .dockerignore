@@ -1,0 +1,7 @@
+.git
+artifacts
+out
+in
+eval/out
+**/__pycache__
+*.bundle
