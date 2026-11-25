@@ -45,3 +45,30 @@ Commit: `Offline retrieval coder`
 - **Measured:** offline dev 0.833 -> 0.867 top-1, top-3 0.933 unchanged.
 - **Caveat:** the lexicon was written after reading the dev notes, so offline
   dev numbers are optimistic. I stopped tuning offline here on purpose.
+
+### 4. 2026-11-26 00:40 · LLM pipeline: two calls per note, offline-first writing
+Commit: `LLM pipeline`
+
+- **Options:** one call (note + offline candidates -> codes); two calls
+  (extract + translate -> retrieve -> choose); agentic multi-round search.
+- **Chosen:** two calls. Call 1 reads the note in any language and returns an
+  English diagnosis, ICD-style search terms and code guesses. Those drive a
+  second retrieval; call 2 picks 3 codes from ~35-45 real candidates (with
+  parents, siblings and children so every specificity level is visible).
+  Multi-round search was dropped: latency and cost for little expected gain.
+- **Measured:** candidate-list recall on dev is 59/60 from offline seeds
+  alone, before the LLM's own search terms are added. Estimated cost with
+  gpt-4.1-mini about $0.0012/note, so ~$0.35 for 300 notes. With
+  claude-haiku-4-5 two calls would be ~$0.004/note (> budget), so the code
+  switches to one choose-only call per note when two calls would exceed 80% of
+  the budget.
+- **Safety:** every note gets an offline answer written to disk before any API
+  call. LLM upgrades rewrite the file atomically (`os.replace`) as they land.
+  The budget guard reserves worst-case cost before each call (cap $0.90).
+  The run stops starting LLM work at 50 min. A circuit breaker turns the LLM
+  off after 12 failures in a row (bad key, proxy not reachable). A model that
+  is not found falls through to the next one in the list.
+- **Not measured yet:** real LLM accuracy (no API key in my build
+  environment). The plumbing is tested with a fake provider.
+- **Revisit:** self-consistency (2 samples, vote) if budget allows; prompt
+  caching to cut call-2 cost.
