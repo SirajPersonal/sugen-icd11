@@ -2,11 +2,14 @@
 
 Kept as the work goes. Each entry is committed with the change it describes, so
 "Commit" names the commit subject the entry ships in (`git log --grep` finds it).
-Times are IST (UTC+05:30).
+Times are IST (UTC+05:30) and match the commit timestamps.
+Correction (00:43): entries 4-9 were first written with estimated times
+(00:40-01:40) that were wrong. They are now the real commit times; see
+`git log -p DECISIONS.md`.
 
 ---
 
-### 1. 2026-11-26 00:25 · Architecture: retrieval + LLM rerank, no training
+### 1. 2026-11-26 00:29 · Architecture: retrieval + LLM rerank, no training
 Commit: `Offline retrieval coder`
 
 - **Options:** (a) fine-tune a classifier; (b) ask an LLM for the code directly;
@@ -18,7 +21,7 @@ Commit: `Offline retrieval coder`
   only has to judge between real titles.
 - **Revisit:** a small embedding model for multilingual retrieval offline.
 
-### 2. 2026-11-26 00:26 · Retrieval = BM25 words + char 3-5-gram TF-IDF
+### 2. 2026-11-26 00:29 · Retrieval = BM25 words + char 3-5-gram TF-IDF
 Commit: `Offline retrieval coder`
 
 - **Options:** BM25 only; TF-IDF only; sentence embeddings (needs torch and a
@@ -29,7 +32,7 @@ Commit: `Offline retrieval coder`
 - **Measured:** offline dev 0.833 top-1 / 0.933 top-3 on first run.
 - **Revisit:** embeddings, if the WHO index terms do not close the gap.
 
-### 3. 2026-11-26 00:27 · Specificity: walk parents down to `.Z`, unless a child is supported
+### 3. 2026-11-26 00:29 · Specificity: walk parents down to `.Z`, unless a child is supported
 Commit: `Offline retrieval coder`
 
 - **Seen:** the grader gives nothing for a parent when a child fits. 2,204 of
@@ -46,7 +49,7 @@ Commit: `Offline retrieval coder`
 - **Caveat:** the lexicon was written after reading the dev notes, so offline
   dev numbers are optimistic. I stopped tuning offline here on purpose.
 
-### 4. 2026-11-26 00:40 · LLM pipeline: two calls per note, offline-first writing
+### 4. 2026-11-26 00:32 · LLM pipeline: two calls per note, offline-first writing
 Commit: `LLM pipeline`
 
 - **Options:** one call (note + offline candidates -> codes); two calls
@@ -73,7 +76,7 @@ Commit: `LLM pipeline`
 - **Revisit:** self-consistency (2 samples, vote) if budget allows; prompt
   caching to cut call-2 cost.
 
-### 5. 2026-11-26 00:55 · Docker: python:3.13-slim, index baked at build, pinned deps
+### 5. 2026-11-26 00:37 · Docker: python:3.13-slim, index baked at build, pinned deps
 Commit: `Docker image and compose`
 
 - **Options:** build the index at run time (simpler image) or at build time.
@@ -92,7 +95,7 @@ Commit: `Docker image and compose`
   variables that point at missing files.
 - **Revisit:** confirm the real `python:3.13-slim` build on a machine with Docker Hub.
 
-### 6. 2026-11-26 01:00 · SDK compatibility checked against a mock API
+### 6. 2026-11-26 00:37 · SDK compatibility checked against a mock API
 Commit: `Docker image and compose`
 
 - Ran the pipeline against a local mock of the OpenAI and Anthropic HTTP APIs
@@ -107,7 +110,7 @@ Commit: `Docker image and compose`
   per 300 notes: gpt-4.1-mini two-stage $0.41, gpt-4o-mini $0.15,
   claude-haiku-4-5 single-call $0.52.
 
-### 7. 2026-11-26 01:15 · Evaluation beyond the dev set: 45 hand-written notes
+### 7. 2026-11-26 00:40 · Evaluation beyond the dev set: 45 hand-written notes
 Commit: `Extra out-of-distribution eval set`
 
 - **Why:** the dev set is 60 notes, 21 chapter blocks, all English. The hidden
@@ -131,7 +134,7 @@ Commit: `Extra out-of-distribution eval set`
 - **Caveat:** these notes come from the same author as the lexicon, so they
   are easier than the hidden set. Use them to catch breakage, not to forecast.
 
-### 8. 2026-11-26 01:25 · WHO index terms: script ready, data not yet fetched
+### 8. 2026-11-26 00:41 · WHO index terms: script ready, data not yet fetched
 Commit: `WHO index-term fetcher`
 
 - **Brief:** "The code list has titles only. WHO publishes a great deal more."
@@ -151,7 +154,7 @@ Commit: `WHO index-term fetcher`
 - **Revisit:** run the fetch (~18k x 4 requests), commit the file, re-run
   `scripts/evaluate.py`, and log the change in recall here.
 
-### 9. 2026-11-26 01:40 · Fresh-clone check of the exact grading command
+### 9. 2026-11-26 00:42 · Fresh-clone check of the exact grading command
 Commit: `Log fresh-clone check`
 
 - `git clone` -> `docker compose build` -> `docker compose run coder
