@@ -150,3 +150,15 @@ Commit: `WHO index-term fetcher`
   carries the vocabulary gap.
 - **Revisit:** run the fetch (~18k x 4 requests), commit the file, re-run
   `scripts/evaluate.py`, and log the change in recall here.
+
+### 9. 2026-11-26 01:40 · Fresh-clone check of the exact grading command
+Commit: `Log fresh-clone check`
+
+- `git clone` -> `docker compose build` -> `docker compose run coder
+  /in/notes.jsonl /out/predictions.jsonl` on the 105 dev + extra notes: 0
+  missing, 0 invalid, offline score 88.0/100 on those (slice A 66.7/75,
+  slice B 21.3/25). Offline pass 2.1 s; the extrapolated 300-note offline pass
+  is under 10 s, so time is all LLM headroom.
+- **Still to do before submission:** run `scripts/evaluate.py` with a real
+  key and record the LLM score; fetch WHO terms; repeat this check on a
+  machine with Docker Hub access (I used a stand-in base image).
