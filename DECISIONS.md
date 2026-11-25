@@ -130,3 +130,23 @@ Commit: `Extra out-of-distribution eval set`
   Dev unchanged at 0.867 / 0.933.
 - **Caveat:** these notes come from the same author as the lexicon, so they
   are easier than the hidden set. Use them to catch breakage, not to forecast.
+
+### 8. 2026-11-26 01:25 · WHO index terms: script ready, data not yet fetched
+Commit: `WHO index-term fetcher`
+
+- **Brief:** "The code list has titles only. WHO publishes a great deal more."
+  The big one is ICD-11's index terms and inclusions (synonyms such as "vaginal
+  thrush" under Vulvovaginal candidosis), plus official titles in French,
+  Spanish and other languages.
+- **Options:** WHO public API (free OAuth registration); WHO's offline API
+  container `whoicd/icd-api` (no credentials); scrape the browser (no).
+- **Done:** `scripts/fetch_who.py` supports both API routes, needs only the
+  standard library, runs 16 workers, and can resume. Output is
+  `data/who_terms.jsonl.gz`, which the index builder merges automatically.
+  Tested against a mock of the API's v2 JSON (title / inclusion / indexTerm,
+  `API-Version: v2`, resume after interrupt).
+- **Not done:** my build box cannot reach `id.who.int` or Docker Hub, so the
+  real file is not in the repo yet. Without it, the hand lexicon (~210 codes)
+  carries the vocabulary gap.
+- **Revisit:** run the fetch (~18k x 4 requests), commit the file, re-run
+  `scripts/evaluate.py`, and log the change in recall here.
